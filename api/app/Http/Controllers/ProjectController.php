@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\Project\StoreProjectRequest;
-use App\Http\Requests\Project\UpdateProjectRequest;
 use App\Models\Project;
-use Inertia\Inertia;
+use Illuminate\Http\Request;
+use Validator;
 
 class ProjectController extends Controller
 {
@@ -14,19 +13,8 @@ class ProjectController extends Controller
      */
     public function index()
     {
-        return Inertia::render('Project/Index',[
-            'projects' =>  Project::all()
-        ]);
+        return Project::all();
     }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
     /**
      * Store a newly created resource in storage.
      */
@@ -40,37 +28,58 @@ class ProjectController extends Controller
      */
     public function show(Project $project)
     {
-        return Inertia::render('Project/Show', [
+        return [
             'project' => $project,
             'tasks' => [
                 'pendiente' => $project->tasks()->where('status', 'pendiente')->get(),
                 'en_progreso' => $project->tasks()->where('status', 'en progreso')->get(),
                 'completada' => $project->tasks()->where('status', 'completada')->get()
             ]
-        ]);
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($board)
-    {
-        //
+        ];
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update($request, $board)
+    public function update(Request $request, int $id)
     {
-        //
+        if (auth()->user()->role_id !== 1)  return response()->json(['message' => 'No autorizado']);
+        $data = Validator::make($request->all(), [
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date',
+        ]);
+
+        if ($data->fails()) {
+            return response()->json(['errors' => $data->messages()]);
+        }
+        $project = Project::find($id);
+        $project->update([
+            'title' => $request->title,
+            'description' => $request->description,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
+        ]);
+
+        if ($project) {
+            return response()->json(['message' => 'actualizado correctamente']);
+        }
+        return response()->json(['message' => 'No se actualizo correctamente']);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($board)
+    public function destroy(int $id)
     {
-        //
+        if (auth()->user()->role_id !== 1)  return response()->json(['message' => 'No autorizado']);
+        $project = Project::find($id);
+
+        if ($project) {
+            $project->delete();
+            return response()->json(['message' => 'Proyecto eliminado correctamente']);
+        }
+        return response()->json(['message' => 'No se encontro el usuario']);
     }
 }

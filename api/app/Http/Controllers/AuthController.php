@@ -15,14 +15,10 @@ class AuthController extends Controller
     public function store(Request $request)
     {
         try {
-            $data = Validator::make($request->all(), [
-                'name' => 'required|string|max:255',
-                'email' => 'required|email|max:255|unique:users',
-                'password' => 'required|string',
-            ]);
+            $data = Validator::make($request->all(), $request->rules());
 
             if ($data->fails()) {
-                return response()->json($data->errors());
+                return response()->json(['errors' => $data->messages()]);
             }
 
             $user = User::create([
