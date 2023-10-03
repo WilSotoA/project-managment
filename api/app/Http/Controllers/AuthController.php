@@ -3,11 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Http\Requests\UserStoreRequest;
 use App\Models\User;
-use Validator;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
@@ -29,7 +27,7 @@ class AuthController extends Controller
 
             $token = $user->createToken('auth_token')->plainTextToken;
             return response()->json([
-                'role' => $user->role_id,
+                'role' => $user->role->name,
                 'message' => 'Usuario creado!',
                 'access_token' => $token,
             ]);
@@ -47,7 +45,7 @@ class AuthController extends Controller
 
         $token = $user->createToken('auth_token')->plainTextToken;
         return response()->json([
-            'role' => $user->role_id,
+            'role' => $user->role->name,
             'access_token' => $token,
         ]);
     }
@@ -55,7 +53,7 @@ class AuthController extends Controller
     public function logout()
     {
         try {
-            auth()->user()->tokens()->delete();
+            auth()->user()->currentAccessToken()->delete();
             return response()->json(['logout' => true]);
         } catch (\Exception $e) {
             return response()->json(['logout' => false], 500);

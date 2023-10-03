@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Project;
 use Illuminate\Http\Request;
-use Validator;
+use Illuminate\Support\Facades\Validator;
 
 class ProjectController extends Controller
 {
@@ -18,9 +18,31 @@ class ProjectController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store($request)
+    public function store(Request $request)
     {
-        //
+        if (auth()->user()->role_id !== 1)  return response()->json(['message' => 'No autorizado']);
+        $data = Validator::make($request->all(), [
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date',
+        ]);
+
+        if ($data->fails()) {
+            return response()->json(['errors' => $data->messages()]);
+        }
+        $project = Project::create([
+            'title' => $request->title,
+            'description' => $request->description,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date
+        ]);
+
+
+        if ($project) {
+            return response()->json(['message' => 'Creado correctamente']);
+        }
+        return response()->json(['message' => 'No se creo correctamente']);
     }
 
     /**
@@ -80,6 +102,6 @@ class ProjectController extends Controller
             $project->delete();
             return response()->json(['message' => 'Proyecto eliminado correctamente']);
         }
-        return response()->json(['message' => 'No se encontro el usuario']);
+        return response()->json(['message' => 'No se encontro el proyecto']);
     }
 }
