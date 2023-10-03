@@ -29,6 +29,7 @@ class AuthController extends Controller
 
             $token = $user->createToken('auth_token')->plainTextToken;
             return response()->json([
+                'role' => $user->role_id,
                 'message' => 'Usuario creado!',
                 'access_token' => $token,
             ]);
@@ -45,8 +46,8 @@ class AuthController extends Controller
         $user = User::where('email', $request['email'])->firstOrFail();
 
         $token = $user->createToken('auth_token')->plainTextToken;
-
         return response()->json([
+            'role' => $user->role_id,
             'access_token' => $token,
         ]);
     }
@@ -54,7 +55,7 @@ class AuthController extends Controller
     public function logout()
     {
         try {
-            // auth()->user()->tokens()->delete();
+            auth()->user()->tokens()->delete();
             return response()->json(['logout' => true]);
         } catch (\Exception $e) {
             return response()->json(['logout' => false], 500);
