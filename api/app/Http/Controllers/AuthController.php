@@ -5,49 +5,63 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Requests\UserStoreRequest;
 use App\Models\User;
+use Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    public function store(UserStoreRequest $request)
+    public function store(Request $request)
     {
         try {
-            $data = $request->validated();
+            $data = Validator::make($request->all(), [
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|max:255|unique:users',
+                'password' => 'required|string',
+            ]);
+
+            if ($data->fails()) {
+                return response()->json($data->errors());
+            }
 
             $user = User::create([
-                'name' => $data['name'],
-                'email' => $data['email'],
-                'password' => bcrypt($data['password'])
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password)
             ]);
-            return response()->json(['message' => 'Usuario creado exitosamente!']);
+
+            $token = $user->createToken('auth_token')->plainTextToken;
+            return response()->json([
+                'message' => 'Usuario creado!',
+                'access_token' => $token,
+            ]);
         } catch (\Exception $e) {
-            $errorCode = $e->getCode();
-            if ($errorCode === '23000') {
-                return response()->json(['message' => 'El correo electrónico ya está en uso.'], 400);
-            }
-            return response()->json(['error' => $errorCode, 'message' => 'Error al crear el usuario.'], 500);
+            return response()->json(['message' => 'Error al crear el usuario.'], 500);
         }
     }
 
     public function login(Request $request)
     {
-        try {
-            $credentials = $request->validate([
-                'email' => ['required', 'email'],
-                'password' => ['required'],
-            ]);
+        if (!Auth::attempt($request->only('email', 'password'))) {
+            return response()->json(['message' => 'Usuario o contraseña incorrectos'], 401);
+        }
+        $user = User::where('email', $request['email'])->firstOrFail();
 
-            if (Auth::attempt($credentials)) {
-                return response()->json(['login' => true]);
-            }
-            return response()->json(['login' => false, 'message' => 'Usuario o contraseña incorrectos'], 401);
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'access_token' => $token,
+        ]);
+    }
+
+    public function logout()
+    {
+        try {
+            // auth()->user()->tokens()->delete();
+            return response()->json(['logout' => true]);
         } catch (\Exception $e) {
-            $errorCode = $e->getCode();
-            if ($errorCode === '23000') {
-                return response()->json(['message' => 'El correo electrónico ya está en uso.'], 400);
-            }
-            return response()->json(['error' => $errorCode, 'message' => 'Error al iniciar sesión'], 500);
+            return response()->json(['logout' => false], 500);
         }
     }
 }
