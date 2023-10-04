@@ -12,28 +12,27 @@ class AuthController extends Controller
 {
     public function store(Request $request)
     {
-        try {
-            $data = Validator::make($request->all(), $request->rules());
+        $data = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users',
+            'password' => 'required|min:4',
+        ]);
 
-            if ($data->fails()) {
-                return response()->json(['errors' => $data->messages()]);
-            }
-
-            $user = User::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => Hash::make($request->password)
-            ]);
-
-            $token = $user->createToken('auth_token')->plainTextToken;
-            return response()->json([
-                'role' => $user->role->name,
-                'message' => 'Usuario creado!',
-                'access_token' => $token,
-            ]);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Error al crear el usuario.'], 500);
+        if ($data->fails()) {
+            return response()->json(['errors' => $data->messages()], '400');
         }
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role_id' => 2
+        ]);
+        $token = $user->createToken('auth_token')->plainTextToken;
+        return response()->json([
+            'role' => $user->role_id,
+            'message' => 'Usuario creado!',
+            'access_token' => $token,
+        ]);
     }
 
     public function login(Request $request)
@@ -45,7 +44,7 @@ class AuthController extends Controller
 
         $token = $user->createToken('auth_token')->plainTextToken;
         return response()->json([
-            'role' => $user->role->name,
+            'role' => $user->role_id,
             'access_token' => $token,
         ]);
     }
