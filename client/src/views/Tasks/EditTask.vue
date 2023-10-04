@@ -1,15 +1,43 @@
 <script setup>
-import { ref } from 'vue'
+import axios from 'axios';
+import { onMounted, ref } from 'vue';
+import { sendRequest } from '../../functions';
+import { useAuthStore } from '../../stores/auth';
+import { useRoute } from 'vue-router';
+
+const authStore = useAuthStore();
+axios.defaults.headers.common['Authorization'] = `Bearer ${authStore.authToken}`;
+
+const route = useRoute()
+const { id } = route.params
 const form = ref({
     'title': '',
     'description': '',
-    'status': '',
+    'status': ''
+});
 
-})
+onMounted(() => { getDetailTask() });
+const getDetailTask = async () => {
+    await axios.get(`/tasks/${id}`).then(
+        res => { 
+            form.value.title = res.data.title
+            form.value.description = res.data.description
+            form.value.status = res.data.status
+        })
+}
+
+
+const save = () => {
+    sendRequest('PUT', form.value, `/tasks/${id}`, `/projects/${id}`);
+    form.value.title = '';
+    form.value.description = '';
+    form.value.status = '';
+
+}
 </script>
 <template>
-    <form class="flex justify-around flex-col items-end space-x-4 w-[80%] mx-auto mt-8">
-        <h2 class="w-full text-center block mb-2 text-lx font-medium text-gray-900">Crear Nueva tarea</h2>
+    <form @submit.prevent="save" class="flex justify-around flex-col items-end space-x-4 w-[80%] mx-auto mt-8">
+        <h2 class="w-full text-center block mb-2 text-lx font-medium text-gray-900">Actualizar Tarea</h2>
         <div class="w-full mb-6">
             <label for="title" class="block mb-2 text-sm font-medium text-gray-900">
                 Titulo: </label>
@@ -33,7 +61,7 @@ const form = ref({
             </select>
         </div>
         <div class="w-full">
-            <button type="submit" class="bg-blue-500 rounded-sm text-white px-4 py-2 w-full">Crear tarea</button>
+            <button type="submit" class="bg-blue-500 rounded-sm text-white px-4 py-2 w-full">Editar tarea</button>
         </div>
     </form>
 </template>

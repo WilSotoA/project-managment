@@ -25,15 +25,25 @@ const router = createRouter({
       component: () => import('../views/Projects/Show.vue'),
     }, 
     {
-      path: '/tasks/create',
+      path: '/projects/create',
+      name: 'createProject',
+      component: () => import('../views/Projects/CreateProject.vue'),
+    }, 
+    {
+      path: '/projects/:id/edit',
+      name: 'editProject',
+      component: () => import('../views/Projects/EditProject.vue'),
+    },
+    {
+      path: '/tasks/create/:projectId',
       name: 'createTask',
       component: () => import('../views/Tasks/CreateTask.vue'),
     }, 
     {
-      path: '/tasks/creat',
+      path: '/tasks/:id/edit',
       name: 'editTask',
       component: () => import('../views/Tasks/EditTask.vue'),
-    }, 
+    }
   ]
 })
 

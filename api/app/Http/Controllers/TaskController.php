@@ -21,7 +21,7 @@ class TaskController extends Controller
      */
     public function store(Request $request)
     {
-        if (auth()->user()->role_id !== 1)  return response()->json(['message' => 'No autorizado']);
+        if (auth()->user()->role_id !== 1)  return response()->json(['message' => 'No autorizado'], '401');
         $data = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
             'description' => 'required|string',
@@ -30,7 +30,7 @@ class TaskController extends Controller
         ]);
 
         if ($data->fails()) {
-            return response()->json(['errors' => $data->messages()]);
+            return response()->json(['errors' => $data->messages()], '400');
         }
         $project = Task::create([
             'title' => $request->title,
@@ -45,12 +45,25 @@ class TaskController extends Controller
         }
         return response()->json(['message' => 'No se creo correctamente']);
     }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(int $id)
+    {
+        $task = Task::find($id);
+        if ($task) {
+            return $task;
+        };
+        return response()->json(['message' => 'No se encontro la tarea'], '500');
+    }
+
     /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, int $id)
     {
-        if (auth()->user()->role_id !== 1)  return response()->json(['message' => 'No autorizado']);
+        if (auth()->user()->role_id !== 1)  return response()->json(['message' => 'No autorizado'], '401');
         $data = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
             'description' => 'required|string',
@@ -58,7 +71,7 @@ class TaskController extends Controller
         ]);
 
         if ($data->fails()) {
-            return response()->json(['errors' => $data->messages()]);
+            return response()->json(['errors' => $data->messages()], '400');
         }
         $task = Task::find($id);
         $task->update([
@@ -70,7 +83,7 @@ class TaskController extends Controller
         if ($task) {
             return response()->json(['message' => 'actualizado correctamente']);
         }
-        return response()->json(['message' => 'No se actualizo correctamente']);
+        return response()->json(['message' => 'No se actualizo correctamente'], 500);
     }
 
     /**
@@ -78,13 +91,13 @@ class TaskController extends Controller
      */
     public function destroy(int $id)
     {
-        if (auth()->user()->role_id !== 1)  return response()->json(['message' => 'No autorizado']);
+        if (auth()->user()->role_id !== 1)  return response()->json(['message' => 'No autorizado'], '401');
         $task = Task::find($id);
 
         if ($task) {
             $task->delete();
             return response()->json(['message' => 'Tarea eliminada correctamente']);
         }
-        return response()->json(['message' => 'No se encontro la tarea']);
+        return response()->json(['message' => 'No se encontro la tarea'], 500);
     }
 }

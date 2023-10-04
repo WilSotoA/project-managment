@@ -16,14 +16,20 @@ const deleteProject = (id, name) => {
 </script>
 <template>
     <div class="w-[45%] bg-white p-5 rounded mt-1 border-b border-grey cursor-pointer hover:bg-grey-lighter">
-        <h2 class="text-xm font-bold uppercase">{{ project.title }}</h2>
+        <div class="w-full flex justify-between">
+            <h2 class="w-[30%] text-xm font-bold uppercase">{{ project.title }}</h2>
+            <div class="w-[75%] flex gap-x-4 justify-end">
+                <p>{{ project.start_date }}</p>
+                <p>{{ project.end_date }}</p>
+            </div>
+        </div>
         <p class="text-sm font-light">{{ project.description }}</p>
         <div class="flex w-full justify-between">
-            <div class="mt-2" v-if="authStore.authUser === 1">
-                <button class="w-[10px]">
+            <div class="mt-2 flex" v-if="authStore.authUser === 1">
+                <RouterLink :to="{ name: 'editProject', params: { id: project.id } }" class="hover:text-green-800">
                     <EditIcon />
-                </button>
-                <button class="w-[25px]" v-on:click="deleteProject(project.id, 'Proyecto')">
+                </RouterLink>
+                <button class="hover:text-red-800" v-on:click="deleteProject(project.id, 'Proyecto')">
                     <DeleteIcon />
                 </button>
             </div>

@@ -1,15 +1,29 @@
 <script setup>
 import { ref } from 'vue';
+import { sendRequest } from '../../functions';
+import { useRoute } from 'vue-router';
+
+const route = useRoute()
+const { projectId } = route.params
+
 
 const form = ref({
     'title': '',
     'description': '',
     'status': '',
+    'project_id': projectId
 
-})
+});
+const save = () => {
+    sendRequest('POST', form.value, '/tasks', `/projects/${projectId}`);
+    form.value.title = '';
+    form.value.description = '';
+    form.value.status = '';
+
+}
 </script>
 <template>
-    <form class="flex justify-around flex-col items-end space-x-4 w-[80%] mx-auto mt-8">
+    <form @submit.prevent="save" class="flex justify-around flex-col items-end space-x-4 w-[80%] mx-auto mt-8">
         <h2 class="w-full text-center block mb-2 text-lx font-medium text-gray-900">Crear Nueva tarea</h2>
         <div class="w-full mb-6">
             <label for="title" class="block mb-2 text-sm font-medium text-gray-900">

@@ -31,16 +31,16 @@ export function confirmation(name, url, redirect) {
 
 export async function sendRequest(method, params, url, redirect = '') {
     const authStore = useAuthStore()
+    console.log(redirect);
     axios.defaults.headers.common['Authorization'] = `Bearer ${authStore.authToken}`;
     let res;
     await axios({ method, url, data: params }).then(
         response => {
             showAlert(response.data.message, 'success', '');
-            setTimeout(() => (!redirect) ? window.location.href = redirect : ''
+            setTimeout(() => (redirect) ? window.location.href = redirect : ''
                 , 2000)
         }).catch((err) => {
         let desc = ''
-            console.log(err);
         const errorObj = err.response?.data?.errors;
         for (let error in errorObj) {
             errorObj[error].map(e => desc += `${e} \n`)

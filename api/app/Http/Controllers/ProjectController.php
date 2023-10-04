@@ -90,6 +90,14 @@ class ProjectController extends Controller
         return response()->json(['message' => 'No se actualizo correctamente']);
     }
 
+    public function edit(int $id) {
+        $project = Project::find($id);
+        if ($project) {
+            return $project;
+        };
+        return response()->json(['message' => 'No se encontro el proyecto'], '500');
+    }
+
     /**
      * Remove the specified resource from storage.
      */
