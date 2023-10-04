@@ -24,6 +24,16 @@ const router = createRouter({
       name: 'projectsShow',
       component: () => import('../views/Projects/Show.vue'),
     }, 
+    {
+      path: '/tasks/create',
+      name: 'createTask',
+      component: () => import('../views/Tasks/CreateTask.vue'),
+    }, 
+    {
+      path: '/tasks/creat',
+      name: 'editTask',
+      component: () => import('../views/Tasks/EditTask.vue'),
+    }, 
   ]
 })
 

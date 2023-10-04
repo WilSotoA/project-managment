@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('title');
             $table->text('description');
             $table->enum('status', ['pendiente', 'en progreso', 'completada'])->default('pendiente');
-            $table->foreignId('project_id')->default(2)->constrained();
+            $table->foreignId('project_id')->default(2)->constrained()->onDelete('CASCADE');
         });
     }
 

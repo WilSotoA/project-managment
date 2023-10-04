@@ -24,6 +24,8 @@ export function confirmation(name, url, redirect) {
         if (result.isConfirmed) {
             sendRequest('DELETE', {}, url, redirect);
         }
+    }).catch(err => {
+        console.log(err);
     });
 }
 
@@ -33,13 +35,12 @@ export async function sendRequest(method, params, url, redirect = '') {
     let res;
     await axios({ method, url, data: params }).then(
         response => {
-            res = 200;
             showAlert(response.data.message, 'success', '');
             setTimeout(() => (!redirect) ? window.location.href = redirect : ''
                 , 2000)
         }).catch((err) => {
-        let desc = '',
-            res = 400;
+        let desc = ''
+            console.log(err);
         const errorObj = err.response?.data?.errors;
         for (let error in errorObj) {
             errorObj[error].map(e => desc += `${e} \n`)
